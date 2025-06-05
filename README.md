@@ -36,8 +36,6 @@ FRONTEND_URL=http://localhost:3000
 - `item-updated`
 - `item-deleted`
 
-Frontend da aplicação: [próximo repositório → `grocery-frontend`](../grocery-frontend)
-
 ---
 
 Se curtir esse projeto, dá uma ⭐ no repositório! 😄
