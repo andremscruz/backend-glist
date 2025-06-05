@@ -6,24 +6,50 @@ exports.getAllItems = async (req, res) => {
 };
 
 exports.createItem = async (req, res) => {
-  const { name } = req.body;
-  const newItem = new Item({ name, quantity, inCart: true });
-  const saved = await newItem.save();
+  try {
+    const { name, quantity } = req.body;
 
-  const io = req.app.get('io');
-  io.emit('item-added', saved);
+    const newItem = new Item({
+      name,
+      quantity: quantity ?? 1,
+      inCart: false            
+    });
 
-  res.status(201).json(saved);
+    const saved = await newItem.save();
+
+    const io = req.app.get('io');
+    io.emit('item-added', saved);
+
+    res.status(201).json(saved);
+  } catch (err) {
+    console.error('Erro ao criar item:', err);
+    res.status(500).json({ message: 'Erro ao criar item' });
+  }
 };
 
 exports.updateItem = async (req, res) => {
-  const { id } = req.params;
-  const updatedItem = await Item.findByIdAndUpdate(id, req.body, { new: true });
+  try {
+    const { id } = req.params;
+    const { name, quantity, inCart } = req.body;
 
-  const io = req.app.get('io');
-  io.emit('item-updated', updatedItem);
+    const updatedItem = await Item.findByIdAndUpdate(
+      id,
+      { name, quantity, inCart },
+      { new: true, runValidators: true }
+    );
 
-  res.json(updatedItem);
+    if (!updatedItem) {
+      return res.status(404).json({ message: 'Item não encontrado' });
+    }
+
+    const io = req.app.get('io');
+    io.emit('item-updated', updatedItem);
+
+    res.json(updatedItem);
+  } catch (err) {
+    console.error('Erro ao atualizar item:', err);
+    res.status(500).json({ message: 'Erro ao atualizar item' });
+  }
 };
 
 exports.deleteItem = async (req, res) => {
